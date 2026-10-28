@@ -643,7 +643,7 @@ namespace hlp {
 
         u64 applicationAruid = 0, appletAruid = 0;
 
-        for (u64 programId = 0x0100000000001000UL; programId < 0x0100000000001020UL; programId++) {
+              for (u64 programId = 0x0100000000001000UL; programId < 0x0100000000001020UL; programId++) {
             // Reset each iteration: pmdmnt leaves the out-param untouched on
             // failure, so a stale aruid from a previous hit would otherwise
             // trigger ~30 redundant hidsys IPC calls per invocation.
@@ -654,6 +654,12 @@ namespace hlp {
                 hidsysEnableAppletToGetInput(!enabled, appletAruid);
         }
 
+        // On newer HOS versions the Shop library-applet slot can use systemWeb
+        // (0100000000001042), outside the legacy 1000-101F applet range.
+        appletAruid = 0;
+        pmdmntGetProcessId(&appletAruid, 0x0100000000001042ULL);
+        if (appletAruid != 0)
+            hidsysEnableAppletToGetInput(!enabled, appletAruid);
 
         pmdmntGetApplicationProcessId(&applicationAruid);
         // Only touch the application's input permission when an application
